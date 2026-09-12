@@ -15,23 +15,19 @@ import {
 } from "lucide-react"
 
 export const dynamic = "force-dynamic"
+export const revalidate = 0
 
 export default async function HomePage() {
-  let categories: any[] = []
-  let featuredProducts: any[] = []
-
-  try {
-    // Fetch categories
-    categories = await prisma.category.findMany({
+  // Fetch categories & featured products directly
+  const [categories, featuredProducts] = await Promise.all([
+    prisma.category.findMany({
       where: { isActive: true },
       include: {
         _count: { select: { products: true } },
       },
       take: 6,
-    })
-
-    // Fetch featured products
-    featuredProducts = await prisma.product.findMany({
+    }),
+    prisma.product.findMany({
       where: { isActive: true, isFeatured: true },
       include: {
         category: { select: { name: true, slug: true } },
@@ -41,10 +37,8 @@ export default async function HomePage() {
         },
       },
       take: 8,
-    })
-  } catch (error) {
-    console.error("Failed to query database for homepage:", error)
-  }
+    }),
+  ])
 
   const formattedProducts = featuredProducts.map((p) => {
     const avgRating =
