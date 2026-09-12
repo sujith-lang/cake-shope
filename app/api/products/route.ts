@@ -18,6 +18,8 @@ const productCreateSchema = z.object({
   preparationTime: z.number().nullable().optional(),
 })
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
@@ -86,9 +88,9 @@ export async function GET(req: NextRequest) {
     })
 
     return NextResponse.json({ success: true, data: productsWithRating }, { status: 200 })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Products GET error:', error)
-    return NextResponse.json({ success: false, message: 'Failed to fetch products' }, { status: 500 })
+    return NextResponse.json({ success: false, message: error?.message || 'Failed to fetch products', stack: String(error) }, { status: 500 })
   }
 }
 

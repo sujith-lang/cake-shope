@@ -37,6 +37,9 @@ const WEIGHT_OPTIONS = [
   { label: "2.0 kg", multiplier: 3.5 },
 ]
 
+// Fallback SVG placeholder as a data URL
+const FALLBACK_IMAGE = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600' viewBox='0 0 600 600'%3E%3Crect width='600' height='600' fill='%23fdf2f8'/%3E%3Ctext x='50%25' y='45%25' font-size='90' text-anchor='middle' dominant-baseline='middle'%3E%F0%9F%8E%82%3C/text%3E%3Ctext x='50%25' y='65%25' font-size='24' text-anchor='middle' dominant-baseline='middle' fill='%23ec4899' font-family='serif'%3ESweet Delights%3C/text%3E%3C/svg%3E`
+
 export function CakeDetailsClient({
   product,
   relatedProducts,
@@ -52,7 +55,8 @@ export function CakeDetailsClient({
   const [quantity, setQuantity] = useState(1)
   const [adding, setAdding] = useState(false)
   const [buying, setBuying] = useState(false)
-  const [imgSrc, setImgSrc] = useState(product.image || "/images/cakes/chocolate-truffle.jpg")
+  const [imgSrc, setImgSrc] = useState(product.image || FALLBACK_IMAGE)
+  const [imgError, setImgError] = useState(false)
 
   // Review Form State
   const [reviewRating, setReviewRating] = useState(5)
@@ -161,7 +165,12 @@ export function CakeDetailsClient({
                 priority
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"
-                onError={() => setImgSrc("/images/cakes/chocolate-truffle.jpg")}
+                onError={() => {
+                  if (!imgError) {
+                    setImgError(true)
+                    setImgSrc(FALLBACK_IMAGE)
+                  }
+                }}
               />
               {isDiscounted && (
                 <Badge className="absolute top-4 left-4 bg-rose-500 text-white font-bold text-sm px-3 py-1 shadow-md">
