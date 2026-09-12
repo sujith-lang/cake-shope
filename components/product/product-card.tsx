@@ -8,6 +8,20 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useCart, useWishlist } from "@/components/providers/store-provider"
 
+// Fallback SVG placeholder as a data URL (always works, no network needed)
+const FALLBACK_IMAGE = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23fdf2f8'/%3E%3Ctext x='50%25' y='45%25' font-size='60' text-anchor='middle' dominant-baseline='middle'%3E%F0%9F%8E%82%3C/text%3E%3Ctext x='50%25' y='65%25' font-size='18' text-anchor='middle' dominant-baseline='middle' fill='%23ec4899' font-family='serif'%3ESweet Delights%3C/text%3E%3C/svg%3E`
+
+/**
+ * Normalize image src: if it's already absolute (http/https/data), use as-is.
+ * If it's a relative path (/images/...), prefix with the app URL in production.
+ */
+function getImageSrc(image: string | null | undefined): string {
+  if (!image) return FALLBACK_IMAGE
+  if (image.startsWith("http") || image.startsWith("data:")) return image
+  // Relative path — works on localhost automatically via Next.js public folder
+  return image
+}
+
 export interface ProductCardProps {
   id: string
   name: string
@@ -37,7 +51,8 @@ export function ProductCard({
   const { addToCart } = useCart()
   const { toggleWishlist, isInWishlist } = useWishlist()
   const [adding, setAdding] = useState(false)
-  const [imgSrc, setImgSrc] = useState(image || "/images/cakes/chocolate-truffle.jpg")
+  const [imgSrc, setImgSrc] = useState(() => getImageSrc(image))
+  const [imgError, setImgError] = useState(false)
 
   const inWishlist = isInWishlist(id)
   const isDiscounted = discountPrice && discountPrice < price
@@ -96,7 +111,12 @@ export function ProductCard({
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-          onError={() => setImgSrc("/images/cakes/chocolate-truffle.jpg")}
+          onError={() => {
+            if (!imgError) {
+              setImgError(true)
+              setImgSrc(FALLBACK_IMAGE)
+            }
+          }}
         />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
           <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 text-slate-800 text-xs font-medium py-1.5 px-3 rounded-full flex items-center gap-1.5 shadow-md transform translate-y-2 group-hover:translate-y-0">
