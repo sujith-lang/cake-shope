@@ -75,8 +75,32 @@ export default function AdminProductsPage() {
     preparationTime: "4",
   })
   const [submitting, setSubmitting] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    setErrorMsg(null)
+    try {
+      const fd = new FormData()
+      fd.append("file", file)
+      const res = await fetch("/api/upload", { method: "POST", body: fd })
+      const data = await res.json()
+      if (res.ok && data.success) {
+        setFormData((prev) => ({ ...prev, image: data.url }))
+      } else {
+        setErrorMsg(data.message || "Image upload failed")
+      }
+    } catch {
+      setErrorMsg("Image upload failed")
+    } finally {
+      setUploading(false)
+      e.target.value = ""
+    }
+  }
 
   const fetchProducts = async () => {
     try {
@@ -511,14 +535,38 @@ export default function AdminProductsPage() {
             </div>
 
             <div>
-              <Label className="text-xs text-slate-300">Image Path or URL</Label>
-              <Input
-                required
-                value={formData.image}
-                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                placeholder="/images/cakes/chocolate-truffle.jpg"
-                className="h-9 text-xs rounded-xl bg-slate-900 border-slate-800 text-white mt-1"
-              />
+              <Label className="text-xs text-slate-300">Cake Image</Label>
+              <div className="mt-1 space-y-2">
+                {/* Preview */}
+                {formData.image && (
+                  <div className="relative w-20 h-20 rounded-xl overflow-hidden border border-slate-700 bg-slate-800">
+                    <Image
+                      src={formData.image}
+                      alt="Preview"
+                      fill
+                      sizes="80px"
+                      className="object-cover"
+                    />
+                  </div>
+                )}
+                {/* Upload button */}
+                <label className="inline-flex items-center gap-2 cursor-pointer bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-medium px-4 py-2 rounded-xl transition-colors">
+                  {uploading ? "Uploading..." : "📁 Upload Image"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageUpload}
+                    disabled={uploading}
+                  />
+                </label>
+                {/* Show current URL (read-only) */}
+                {formData.image && (
+                  <p className="text-[10px] text-slate-500 font-mono truncate max-w-sm">
+                    {formData.image}
+                  </p>
+                )}
+              </div>
             </div>
 
             <div>

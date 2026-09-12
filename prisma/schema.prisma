@@ -1,5 +1,5 @@
 datasource db {
-  provider = "mongodb"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -39,7 +39,7 @@ enum CakeRequestStatus {
 }
 
 model User {
-  id                 String               @id @default(uuid()) @map("_id")
+  id                 String               @id @default(uuid())
   name               String
   email              String               @unique
   password           String
@@ -62,7 +62,7 @@ model User {
 }
 
 model Address {
-  id           String   @id @default(uuid()) @map("_id")
+  id           String   @id @default(uuid())
   userId       String
   name         String
   phone        String
@@ -80,7 +80,7 @@ model Address {
 }
 
 model Category {
-  id          String    @id @default(uuid()) @map("_id")
+  id          String    @id @default(uuid())
   name        String
   slug        String    @unique
   description String?
@@ -92,7 +92,7 @@ model Category {
 }
 
 model Product {
-  id               String         @id @default(uuid()) @map("_id")
+  id               String         @id @default(uuid())
   name             String
   slug             String         @unique
   description      String
@@ -104,7 +104,7 @@ model Product {
   image            String?
   isFeatured       Boolean        @default(false)
   isActive         Boolean        @default(true)
-  preparationTime  Int?           // in hours
+  preparationTime  Int?
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
   category         Category       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
@@ -116,16 +116,16 @@ model Product {
 }
 
 model ProductImage {
-  id         String  @id @default(uuid()) @map("_id")
-  productId  String
-  imageUrl   String
-  altText    String?
-  sortOrder  Int     @default(0)
-  product    Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  id        String  @id @default(uuid())
+  productId String
+  imageUrl  String
+  altText   String?
+  sortOrder Int     @default(0)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 
 model Cart {
-  id        String     @id @default(uuid()) @map("_id")
+  id        String     @id @default(uuid())
   userId    String     @unique
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
@@ -134,7 +134,7 @@ model Cart {
 }
 
 model CartItem {
-  id        String  @id @default(uuid()) @map("_id")
+  id        String  @id @default(uuid())
   cartId    String
   productId String
   quantity  Int
@@ -146,7 +146,7 @@ model CartItem {
 }
 
 model Wishlist {
-  id        String         @id @default(uuid()) @map("_id")
+  id        String         @id @default(uuid())
   userId    String         @unique
   createdAt DateTime       @default(now())
   user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -154,7 +154,7 @@ model Wishlist {
 }
 
 model WishlistItem {
-  id         String   @id @default(uuid()) @map("_id")
+  id         String   @id @default(uuid())
   wishlistId String
   productId  String
   wishlist   Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
@@ -164,7 +164,7 @@ model WishlistItem {
 }
 
 model Order {
-  id             String        @id @default(uuid()) @map("_id")
+  id             String        @id @default(uuid())
   orderNumber    String        @unique
   userId         String
   addressId      String
@@ -186,7 +186,7 @@ model Order {
 }
 
 model OrderItem {
-  id          String  @id @default(uuid()) @map("_id")
+  id          String  @id @default(uuid())
   orderId     String
   productId   String
   productName String
@@ -198,10 +198,10 @@ model OrderItem {
 }
 
 model Review {
-  id         String   @id @default(uuid()) @map("_id")
+  id         String   @id @default(uuid())
   userId     String
   productId  String
-  rating     Int      // 1 to 5
+  rating     Int
   comment    String?
   isApproved Boolean  @default(false)
   createdAt  DateTime @default(now())
@@ -211,10 +211,10 @@ model Review {
 }
 
 model Coupon {
-  id                 String    @id @default(uuid()) @map("_id")
+  id                 String    @id @default(uuid())
   code               String    @unique
   description        String?
-  discountType       String    // PERCENTAGE or FIXED
+  discountType       String
   discountValue      Float
   minimumOrderAmount Float?
   maximumDiscount    Float?
@@ -227,7 +227,7 @@ model Coupon {
 }
 
 model CustomCakeRequest {
-  id             String            @id @default(uuid()) @map("_id")
+  id             String            @id @default(uuid())
   userId         String?
   name           String
   email          String
@@ -247,12 +247,12 @@ model CustomCakeRequest {
 }
 
 model ContactMessage {
-  id        String   @id @default(uuid()) @map("_id")
+  id        String   @id @default(uuid())
   name      String
   email     String
   phone     String?
   subject   String
   message   String
-  status    String   @default("UNREAD") // UNREAD, READ, RESPONDED
+  status    String   @default("UNREAD")
   createdAt DateTime @default(now())
 }
